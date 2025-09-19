@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 30
+    },
+    "auditLog": "/Users/giangngo/Projects/pos-system-api/logs/.eb52d97d70dcc4eb921c83d6741a760bfa0bb97b-audit.json",
+    "files": [
+        {
+            "date": 1758246676463,
+            "name": "/Users/giangngo/Projects/pos-system-api/logs/info-2025-09-19.log",
+            "hash": "0f7dfc9a0f25917d6288c8c890be6850c8c3f6af3b80164deb406e9a9ac58832"
+        }
+    ],
+    "hashType": "sha256"
+}
