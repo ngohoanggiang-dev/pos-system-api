@@ -8,9 +8,9 @@ app.use(express.json());
 // const pool = mysql.createPool({ host: "13.124.26.102", user: "moadev", password: "Ectus!2#", database: "test_moa_platform" });
 const pool = mysql.createPool({ host: "127.0.0.1", user: "moadev", password: "Ectus!2#", database: "test_moa_platform" });
 const SECRET_KEY = "!AWM321@";
-const { importCSVtoMySQL } = require("./import.js");
+const { importCSVtoMySQL } = require("./service/import.js");
 const multer = require("multer");
-const logger = require("./logger.js");
+const logger = require("./service/logger.js");
 const AdmZip = require("adm-zip");
 const appRoot = require("app-root-path");
 const mime = require("mime-types");
@@ -161,8 +161,10 @@ app.post("/api/syncProduct", upload.single("martFile"), async (req, res) => {
    try {
       const martCode = req.body.martCode;
       const martGroup = req.body.martGroup;
-      if (martCode === undefined || martGroup === undefined) {
-         return res.status(500).json({ result: false, data: null, message: "Mart code or mart group cannot null" });
+      const isLastFile = req.body.isLastFile;
+
+      if (martCode === undefined || martGroup === undefined || isLastFile === undefined) {
+         return res.status(500).json({ result: false, data: null, message: "Mart code or mart group or isLastFile cannot null" });
       }
       if (!req.file) {
          return res.status(500).json({ result: false, data: false, message: "Mart file cannot null" });
@@ -203,13 +205,15 @@ app.post("/api/syncProduct", upload.single("martFile"), async (req, res) => {
             }
          }
 
-         await connection.query(
+         if(isLastFile === "Y"){
+            await connection.query(
             ` UPDATE TBL_MOA_MART_SYNC
-                SET LAST_DATE_SYNC = IFNULL(LAST_DATE_SYNC, NOW()) + INTERVAL 10 MINUTE
-                 WHERE M_MOA_CODE = ? AND M_GROUP = ? `,
+               SET LAST_DATE_SYNC = DATE_ADD(IFNULL(LAST_DATE_SYNC, NOW()), INTERVAL 10 MINUTE)
+               WHERE M_MOA_CODE = ? AND M_GROUP = ? LIMIT 1 `,
             [martCode, martGroup]
-         );
-
+          );
+         }
+        
          await connection.commit(); // Commit transaction
 
          return res.status(200).json({ result: true, data: true, message: "Sync product success" });
