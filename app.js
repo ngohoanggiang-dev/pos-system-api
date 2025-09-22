@@ -5,8 +5,8 @@ const fs = require("fs");
 const path = require("path");
 const ini = require("ini");
 app.use(express.json());
-// const pool = mysql.createPool({ host: "13.124.26.102", user: "moadev", password: "Ectus!2#", database: "test_moa_platform" });
-const pool = mysql.createPool({ host: "127.0.0.1", user: "moadev", password: "Ectus!2#", database: "test_moa_platform" });
+// const pool = mysql.createPool({ host: "13.124.26.102", user: "moadev", password: "Ectus!2#", database: "test_moa_platform", timezone:"Z" });
+const pool = mysql.createPool({ host: "127.0.0.1", user: "moadev", password: "Ectus!2#", database: "test_moa_platform",  timezone:"Z" });
 const SECRET_KEY = "!AWM321@";
 const { importCSVtoMySQL } = require("./service/import.js");
 const multer = require("multer");
@@ -78,6 +78,7 @@ app.post("/api/getLastDate", async (req, res) => {
          return res.status(500).json({ result: false, data: null, message: "Mart code or mart group cannot null" });
       } else {
          const [rows] = await pool.query(` SELECT LAST_DATE_SYNC FROM TBL_MOA_MART_SYNC WHERE M_MOA_CODE = ? AND M_GROUP = ? LIMIT 1 `, [martCode, martGroup]);
+         console.log("rows", rows)
          if (rows[0]) {
             logger.writeLog("info", `/api/getLastDate: ${JSON.stringify(req.body)} => Get info success`);
             return res.status(200).json({
@@ -159,6 +160,7 @@ app.get("/api/getQueryFile/:martGroup/:martCode", async (req, res) => {
 
 app.post("/api/syncProduct", upload.single("martFile"), async (req, res) => {
    try {
+      const syncTime = moment().format("YYYY-MM-DD HH:mm:ss");
       const martCode = req.body.martCode;
       const martGroup = req.body.martGroup;
       const isLastFile = req.body.isLastFile;
@@ -208,9 +210,9 @@ app.post("/api/syncProduct", upload.single("martFile"), async (req, res) => {
          if(isLastFile === "Y"){
             await connection.query(
             ` UPDATE TBL_MOA_MART_SYNC
-               SET LAST_DATE_SYNC = DATE_ADD(IFNULL(LAST_DATE_SYNC, NOW()), INTERVAL 10 MINUTE)
+               SET LAST_DATE_SYNC = ?
                WHERE M_MOA_CODE = ? AND M_GROUP = ? LIMIT 1 `,
-            [martCode, martGroup]
+            [syncTime, martCode, martGroup]
           );
          }
         
