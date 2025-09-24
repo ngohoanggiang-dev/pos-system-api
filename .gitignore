@@ -1,4 +1,6 @@
-/daemon
 /node_modules
+/logs
+/public/pos-logs
 package-lock.json
 .DS_Store
+.env

@@ -1,0 +1,10 @@
+[
+  {
+    "action": "init",
+    "query": "select * from goods"
+  },
+  {
+    "action": "update",
+    "query": "select * from goods where (goods_rdate >= $date and goods_edate is null) or (goods_edate >= $date)"
+  }
+]
