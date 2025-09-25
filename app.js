@@ -28,7 +28,7 @@ app.use(
 
 // ROUTER
 const posRouter = require("./app/routers/pos.js");
-app.use("/", posRouter);
+app.use("/api/pos", posRouter);
 
 app.listen(process.env.PORT, () => {
    console.log(`Server running at http://localhost:${process.env.PORT}`);
